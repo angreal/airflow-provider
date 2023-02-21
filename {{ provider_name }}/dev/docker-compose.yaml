@@ -26,7 +26,7 @@ x-airflow-common:
   volumes:
     - ../example_dags:/usr/local/airflow/dags
     - ./logs:/usr/local/airflow/logs
-    - ../airflow_provider_{{provider-slug}}:/usr/local/airflow/airflow_provider_{{provider-slug}}
+    - ../{{provider_slug}}:/usr/local/airflow/{{provider_slug}}
   depends_on:
     &airflow-common-depends-on
     redis:

@@ -1,4 +1,0 @@
-# {{provider-name}}
----
-
-
