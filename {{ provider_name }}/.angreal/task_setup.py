@@ -1,5 +1,5 @@
 import angreal
-from angreal.integrations.venv import venv_required
+from angreal.integrations.venv import VirtualEnv
 
 import os
 import subprocess
