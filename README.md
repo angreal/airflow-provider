@@ -23,14 +23,14 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
-    clean           shut down services and remove files
+    demo-clean      shut down services and remove files
+    demo-start      start services for example dags
+    demo-stop       stop services for example dags
     dev-setup       setup a development environment
-    dist            build your project for distribution
     help            Print this message or the help of the given subcommand(s)
     init            Initialize an Angreal template from source.
     lint            lint our project
     run-tests       run our test suite. default is unit tests only
-    start           start services for example dags
     static-tests    run static analyses on our project
-    stop            stop services for example dags
+
 ```
