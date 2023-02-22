@@ -1,5 +1,5 @@
 import angreal
-from angreal.integrations.venv import venv_required
+from angreal.integrations.venv import venv_required,VirtualEnv
 
 import os
 import subprocess
@@ -7,6 +7,7 @@ import webbrowser
 
 venv_location = os.path.join(angreal.get_root(),'..','.venv')
 cwd = os.path.join(angreal.get_root(), '..')
+venv_python = VirtualEnv(venv_location).ensure_directories.env_exe
 
 @venv_required(venv_location)
 @angreal.command(name='run-tests', about="run our test suite. default is unit tests only")
@@ -21,11 +22,11 @@ def run_tests(integration=False,full=False,open=False):
     output_file = os.path.realpath(os.path.join(cwd,'htmlcov','index.html'))
 
     if integration: 
-        subprocess.run('pytest -vvv --cov={{ provider_slug }} --cov-report html --cov-report term tests/integration',shell=True, cwd=cwd)
+        subprocess.run(f"{venv_python} -mpytest -vvv --cov={{ provider_slug }} --cov-report html --cov-report term tests/integration",shell=True, cwd=cwd)
     if full:
-        subprocess.run('pytest -vvv --cov={{ provider_slug }} --cov-report html --cov-report term tests/',shell=True, cwd=cwd)
+        subprocess.run(f"{venv_python} -m pytest -vvv --cov={{ provider_slug }} --cov-report html --cov-report term tests/",shell=True, cwd=cwd)
     if not integration and not full:
-        subprocess.run('pytest -vvv --cov={{ provider_slug }} --cov-report html --cov-report term tests/unit',shell=True, cwd=cwd)    
+        subprocess.run(f"{venv_python} -m pytest -vvv --cov={{ provider_slug }} --cov-report html --cov-report term tests/unit",shell=True, cwd=cwd)    
     if open:
         webbrowser.open_new('file://{}'.format(output_file))
 
@@ -36,7 +37,7 @@ def run_tests(integration=False,full=False,open=False):
 def static(open):
     subprocess.run(
         (
-            "mypy {{ provider_slug }} --ignore-missing-imports --html-report typing_report"
+            f"{venv_python} -m mypy {{ provider_slug }} --ignore-missing-imports --html-report typing_report"
         ),
         shell=True,
         cwd=cwd
@@ -48,7 +49,9 @@ def static(open):
 
 @venv_required(venv_location)
 @angreal.command(name='lint', about="lint our project")
+@angreal.argument(name="open", long="open", short='o', takes_value=False, help="open results in web browser")
 def lint(open):
+
     subprocess.run(
         (
         "pre-commit run --all-files"
