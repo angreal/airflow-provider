@@ -14,10 +14,8 @@ logger = logging.getLogger("airflow")
 
 
 
-class {{name | title | spaceless ~ "Operator"}}(BaseOperator):
-    """
-    {{name | title | spaceless ~ "Operator"}}
-    """
+class {{name | title | replace(from=" ", to="") }}Operator(BaseOperator):
+    
     template_fields = ()
 
     def __init__(self, **kwargs) -> None:
@@ -28,7 +26,7 @@ class {{name | title | spaceless ~ "Operator"}}(BaseOperator):
         raise NotImplementedError("You need to implement an __init__ method for this class")
     
 
-    def execute(self,context) -> Any:
+    def execute(self,context) -> typing.Any:
 
         # This is where you write the python code that gets executed on a schedule
         raise NotImplementedError("You need to implement an execute method for this class")

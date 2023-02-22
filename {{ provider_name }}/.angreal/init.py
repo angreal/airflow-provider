@@ -19,6 +19,7 @@ def init():
         (
         "pre-commit install;"
         "pre-commit run --all-files;"
+        "pre-commit run --all-files;"
         ),
         shell=True,
     )

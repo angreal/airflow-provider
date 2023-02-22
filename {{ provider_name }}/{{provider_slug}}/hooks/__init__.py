@@ -13,10 +13,7 @@ logger = logging.getLogger("airflow")
 
 
 
-class {{name | title | spaceless ~ "Hook"}}(BaseHook):
-    """
-    {{name | title | spaceless ~ "Hook"}}
-    """
+class {{ name | title | replace(from=" ", to="")}}Hook(BaseHook):
     
     default_conn_name = "{{name ~ "_default"}}"
 
