@@ -2,5 +2,35 @@
 
 An angreal template for the creation and distribution of Airflow providers.
 
+## Usage 
 
-## Features
+```
+pip install angreal
+angreal init https://github.com/angreal/airflow-provider.git
+```
+
+## Template Usage
+
+```
+angreal 2.0.3
+
+USAGE:
+    angreal [OPTIONS] <SUBCOMMAND>
+
+OPTIONS:
+    -h, --help       Print help information
+    -v, --verbose    verbose level, (may be used multiple times for more verbosity)
+    -V, --version    Print version information
+
+SUBCOMMANDS:
+    clean           shut down services and remove files
+    dev-setup       setup a development environment
+    dist            build your project for distribution
+    help            Print this message or the help of the given subcommand(s)
+    init            Initialize an Angreal template from source.
+    lint            lint our project
+    run-tests       run our test suite. default is unit tests only
+    start           start services for example dags
+    static-tests    run static analyses on our project
+    stop            stop services for example dags
+```
