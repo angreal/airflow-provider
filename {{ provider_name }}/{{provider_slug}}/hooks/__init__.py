@@ -15,7 +15,7 @@ logger = logging.getLogger("airflow")
 
 class {{ name | title | replace(from=" ", to="")}}Hook(BaseHook):
     
-    default_conn_name = "{{name ~ "_default"}}"
+    default_conn_name = "{{ name | lower | replace(from=" ", to="_") }}_default"
 
     def __init__(self, **kwargs) -> None:
         
