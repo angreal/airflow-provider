@@ -10,7 +10,7 @@ import os
 
 def init():
     os.chdir("{{provider_name}}")
-    VirtualEnv(".venv", now=True, requirements=".[dev]")
+    VirtualEnv(".venv", now=True, requirements=".[dev]").install_requirements()
     g = Git()
     g.init()
     g.add('.')

@@ -9,11 +9,12 @@ venv_location = os.path.join(angreal.get_root(),'..','.venv')
 cwd = os.path.join(angreal.get_root(), '..')
 venv_python = VirtualEnv(venv_location).ensure_directories.env_exe
 
-@venv_required(venv_location)
+
 @angreal.command(name='run-tests', about="run our test suite. default is unit tests only")
 @angreal.argument(name="integration", long="integration", short='i', takes_value=False, help="run integration tests only")
 @angreal.argument(name="full", long="full", short='f', takes_value=False, help="run integration and unit tests")
 @angreal.argument(name="open", long="open", short='o', takes_value=False, help="open results in web browser")
+@venv_required(venv_location)
 def run_tests(integration=False,full=False,open=False):
     
     if full:
@@ -31,9 +32,10 @@ def run_tests(integration=False,full=False,open=False):
         webbrowser.open_new('file://{}'.format(output_file))
 
 
-@venv_required(venv_location)
+
 @angreal.command(name='static-tests', about="run static analyses on our project")
 @angreal.argument(name="open", long="open", short='o', takes_value=False, help="open results in web browser")
+@venv_required(venv_location)
 def static(open):
     subprocess.run(
         (
@@ -47,9 +49,10 @@ def static(open):
         webbrowser.open(f'file:://{os.path.join(cwd,"typing_report","index.html")}')
 
 
-@venv_required(venv_location)
+
 @angreal.command(name='lint', about="lint our project")
 @angreal.argument(name="open", long="open", short='o', takes_value=False, help="open results in web browser")
+@venv_required(venv_location)
 def lint(open):
 
     subprocess.run(
