@@ -1,8 +1,8 @@
-ARG IMAGE_NAME="apache/airflow:2.3.4"
+ARG IMAGE_NAME="apache/airflow:{{airflow_version}}}"
 FROM ${IMAGE_NAME}
 
 USER airflow
-COPY --chown=airflow:airflow . ${AIRFLOW_HOME}/airflow_provider_this_provider
+COPY --chown=airflow:airflow . ${AIRFLOW_HOME}/{{ provider_name }}
 RUN pip install --upgrade pip
-RUN pip install -e ${AIRFLOW_HOME}/airflow_provider_this_provider/[dev]
+RUN pip install -e ${AIRFLOW_HOME}/{{provider_name}}/[dev]
 USER ${AIRFLOW_UID}
