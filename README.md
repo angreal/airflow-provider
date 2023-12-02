@@ -11,8 +11,8 @@ angreal init https://github.com/angreal/airflow-provider.git
 
 ## Template Usage
 
-```
-angreal 2.0.3
+```bash
+angreal 2.1.2
 
 USAGE:
     angreal [OPTIONS] <SUBCOMMAND>
@@ -23,14 +23,8 @@ OPTIONS:
     -V, --version    Print version information
 
 SUBCOMMANDS:
-    demo-clean      shut down services and remove files
-    demo-start      start services for example dags
-    demo-stop       stop services for example dags
-    dev-setup       setup a development environment
-    help            Print this message or the help of the given subcommand(s)
-    init            Initialize an Angreal template from source.
-    lint            lint our project
-    run-tests       run our test suite. default is unit tests only
-    static-tests    run static analyses on our project
-
+    demo    commands for controlling the demo environment
+    dev     commands for your development environment
+    help    Print this message or the help of the given subcommand(s)
+    test    commands for executing tests
 ```
