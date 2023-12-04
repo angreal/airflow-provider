@@ -10,21 +10,12 @@ import logging
 import typing
 
 from airflow.hooks.base import BaseHook
+from airflow.compat.functools import cached_property
 
 logger = logging.getLogger("airflow")
 
 class {{ name | title | replace(from=" ", to="")}}Hook(BaseHook):
     """
-    Sample Hook that interacts with an HTTP endpoint the Python requests library.
-
-    :param method: the API method to be called
-    :type method: str
-    :param sample_conn_id: connection that has the base API url i.e https://www.google.com/
-        and optional authentication credentials. Default headers can also be specified in
-        the Extra field in json format.
-    :type sample_conn_id: str
-    :param auth_type: The auth type for the service
-    :type auth_type: AuthBase of python requests lib
     """
 
     conn_name_attr = "{{ name | lower | replace(from=" ", to="_") }}_conn_id"
@@ -44,16 +35,28 @@ class {{ name | title | replace(from=" ", to="")}}Hook(BaseHook):
  
     @staticmethod
     def get_connection_form_widgets() -> dict[str, typing.Any]:
-        """Returns connection widgets to add to connection form"""
+        """Add fields to the connection form of the UI. These connection attributes are put into the extras field."""
+        from flask_appbuilder.fieldwidgets import BS3PasswordFieldWidget, BS3TextFieldWidget
+        from flask_babel import lazy_gettext
+        from wtforms import PasswordFIeld, StringField
+
+        # object entries have the format
+        # attribute_name : wtform.Field(lazy_gettext("Dispay Text"), widget=FieldWidget())
+
         return {
             }
 
     @staticmethod
     def get_ui_field_behaviour() -> dict:
-        """Returns custom field behaviour"""
-        import json
-        return {
-            }
+        """Customize the behavior of the connection for of the UI."""
+        
+        return return {
+            "hidden_fields": [], # fields we want to hide
+            "placeholders": { # fields we provide examples for
+                    #field_name : example_value
+                    },
+            "relabeling" : {} # fields we want to relabel in the UI (ie schema become protocol) 
+        }
 
 
     def get_conn(self) -> typing.Any:
@@ -73,5 +76,5 @@ class {{ name | title | replace(from=" ", to="")}}Hook(BaseHook):
         x = self.get_conn()
         alive = x.test_alive()
         if alive:
-            return [True, "Alive"]
-        return [False, "Not Alive"]
+            return (True, "Alive")
+        return (False, "Not Alive")
