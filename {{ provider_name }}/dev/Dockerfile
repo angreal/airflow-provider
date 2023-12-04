@@ -3,6 +3,5 @@ FROM ${IMAGE_NAME}
 
 USER airflow
 COPY --chown=airflow:airflow . ${AIRFLOW_HOME}/{{ provider_name }}
-RUN pip install --upgrade pip
-RUN pip install -e ${AIRFLOW_HOME}/{{provider_name}}/[dev]
-USER ${AIRFLOW_UID}
+COPY --chown=airflow:airflow example_dags/ /opt/airflow/dags
+RUN pip install --no-cache-dir --user ${AIRFLOW_HOME}/{{provider_name}}/.
