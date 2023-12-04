@@ -14,4 +14,4 @@ def test_operator_execute_complete():
     operator = {{name | title | replace(from=" ", to="") }}Sensor(task_id="test")
     
     event = {} 
-    X = operator.execute(context={}, event=event)
+    x = operator.execute(context={}, event=event)

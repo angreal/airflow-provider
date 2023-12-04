@@ -1,7 +1,7 @@
 import typing
 from airflow.models import BaseOperator
 
-from {{project_slug}}.triggers import {{name | title | replace(from=" ", to="")}}Trigger
+from {{provider_slug}}.triggers import {{name | title | replace(from=" ", to="")}}Trigger
 
 
 class {{name | title | replace(from=" ", to="")}}Sensor(BaseOperator):

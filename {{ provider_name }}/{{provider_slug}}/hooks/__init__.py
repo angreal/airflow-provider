@@ -41,7 +41,7 @@ class {{ name | title | replace(from=" ", to="")}}Hook(BaseHook):
         from wtforms import PasswordFIeld, StringField
 
         # object entries have the format
-        # attribute_name : wtform.Field(lazy_gettext("Dispay Text"), widget=FieldWidget())
+        # attribute_name : wtform.Field(lazy_gettext("Display Text"), widget=FieldWidget())
 
         return {
             }
@@ -50,7 +50,7 @@ class {{ name | title | replace(from=" ", to="")}}Hook(BaseHook):
     def get_ui_field_behaviour() -> dict:
         """Customize the behavior of the connection for of the UI."""
         
-        return return {
+        return {
             "hidden_fields": [], # fields we want to hide
             "placeholders": { # fields we provide examples for
                     #field_name : example_value
