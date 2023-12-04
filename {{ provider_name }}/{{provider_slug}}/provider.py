@@ -5,7 +5,7 @@ import {{provider_slug}}
 def get_provider_info() -> typing.Dict[str,typing.Any]:
     return {
         "package-name": "{{provider_name}}",  # Required
-        "name": "{{provider_name}}",  # Required
+        "name": "{{name}}",  # Required
         "description": "{{short_description}}",  # Required
         "versions": {{provider_slug}}.__version__,  # Required
         "connection-types" : [
