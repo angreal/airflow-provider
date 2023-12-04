@@ -1,12 +1,10 @@
 import typing
-from airflow.sensors.base import BaseSensorOperator, PokeReturnValue
+from airflow.models import BaseOperator
+
+from {{project_slug}}.triggers import {{name | title | replace(from=" ", to="")}}Trigger
 
 
-def method_for_checking_state():
-    """A method for checking on something when we poke"""
-    pass
-
-class {{name | title | replace(from=" ", to="")}}Sensor(BaseSensorOperator):
+class {{name | title | replace(from=" ", to="")}}Sensor(BaseOperator):
 
     template_fields = ()
 
@@ -14,8 +12,14 @@ class {{name | title | replace(from=" ", to="")}}Sensor(BaseSensorOperator):
         super().__init__(**kwargs)
         raise NotImplementedError("You need to implement an __init__ method for this class")
 
-    def poke(self, context) -> typing.Union[PokeReturnValue, bool]:
+    def execute(self,context) -> typing.Any:
 
-        raise NotImplementedError("You need to implement a poke method for this class")
-        return_value = method_for_checking_state()
-        return PokeReturnValue(bool(return_value))
+        self.defer(
+            trigger = {{name | title | replace(from=" ", to="")}}Trigger(),
+            method_name="execute_complete"
+        )
+
+    def execute_complete(self,context,event=None):
+        return event
+
+
