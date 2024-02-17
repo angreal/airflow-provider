@@ -1,29 +1,24 @@
-import angreal
-from angreal.integrations.git import Git
-from angreal.integrations.venv import VirtualEnv
-
 import subprocess
-import os
 
 
 
 
 def init():
-    os.chdir("{{provider_name}}")
-    VirtualEnv(".venv", now=True, requirements=".[dev]").install_requirements()
-    g = Git()
-    g.init()
-    g.add('.')
-
     subprocess.run(
         (
+         "git config --global init.defaultBranch main;"
+         "git init .;"
+         "git add .;"
+         "pip install uv;"
+         "uv venv;"
+         ". .venv/bin/activate;"
+        "uv pip install -e .[dev];"
         "pre-commit install;"
         "pre-commit run --all-files;"
-        "pre-commit run --all-files;" 
+        "git commit -am '{{ provider_slug }} initialized via angreal';"
         ),
         shell=True,
+        cwd = "{{ provider_name }}"
     )
-
-    g.commit("-am '{{ provider_name }} initialized via angreal'")
 
     pass
