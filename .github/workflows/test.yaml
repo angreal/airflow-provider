@@ -37,7 +37,7 @@ jobs:
       # (Python 3.12) and install against Airflow's constraints file
       # (constraints-<airflow_version>/constraints-3.12.txt), so installs are
       # reproducible.
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.2.0  # setup-uv publishes no major-version tag
         with:
           enable-cache: true
           cache-dependency-glob: |
