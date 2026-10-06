@@ -1,0 +1,13 @@
+.venv/
+.git/
+dev/logs/
+htmlcov/
+typing_report/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+**/__pycache__/
+*.egg-info/
+build/
+dist/
+tests/airflow/
