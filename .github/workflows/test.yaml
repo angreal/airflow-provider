@@ -1,0 +1,110 @@
+# Render the template with angreal and run the rendered project's tests.
+# This file is at the repository root, outside the template root
+# `{{ provider_name }}/`, so `angreal init` does not copy it into users' projects.
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  render-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TEMPLATE_DIR: ${{ github.workspace }}/../template
+      RENDER_DIR: ${{ github.workspace }}/../render
+      # The name that `angreal init --defaults` gives the rendered project.
+      PROJECT: airflow-provider-this-provider
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # The template's init.py and `angreal dev setup` create the venv with uv
+      # (Python 3.12) and install against Airflow's constraints file
+      # (constraints-<airflow_version>/constraints-3.12.txt), so installs are
+      # reproducible.
+      - uses: astral-sh/setup-uv@v10.2.0  # setup-uv publishes no major-version tag
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            angreal.toml
+            */pyproject.toml
+
+      - name: Install angreal
+        run: |
+          python -m pip install --upgrade angreal
+          angreal --version
+
+      - name: Configure git
+        # The template's init.py creates a git repository and commits to it.
+        run: |
+          git config --global user.name "angreal CI"
+          git config --global user.email "ci@angreal.invalid"
+          git config --global init.defaultBranch main
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('*/.pre-commit-config.yaml') }}
+
+      - name: Copy the template without .git
+        # Workaround: released angreal (<= 2.9.1) fast-forward-pulls a local template
+        # folder that is a git checkout, which can fail or change the checkout. Render
+        # from a copy without .git. Remove this once angreal >= 2.9.2 is released
+        # (fix in angreal PR #145, task ANG-T-0038) and render "$GITHUB_WORKSPACE".
+        run: |
+          mkdir -p "$TEMPLATE_DIR"
+          git archive HEAD | tar -x -C "$TEMPLATE_DIR"
+          ls -la "$TEMPLATE_DIR"
+
+      - name: Render the template
+        run: |
+          mkdir -p "$RENDER_DIR"
+          cd "$RENDER_DIR"
+          angreal init --defaults "$TEMPLATE_DIR"
+          test -d "$RENDER_DIR/$PROJECT/.angreal"
+          git -C "$RENDER_DIR/$PROJECT" log --oneline -1
+
+      - name: Check the rendered project
+        working-directory: ${{ env.RENDER_DIR }}/${{ env.PROJECT }}
+        run: |
+          find . -path ./.venv -prune -o -path ./.git -prune -o -type f -print | sort
+          if [ -e .github/workflows/test.yaml ] || [ -e .github ]; then
+            echo "::error::the rendered project contains the template repository's .github folder"
+            exit 1
+          fi
+          echo "OK: the rendered project has no .github/workflows/test.yaml"
+
+      - name: angreal dev setup
+        # init.py does not fail the render when the venv install fails; this does.
+        working-directory: ${{ env.RENDER_DIR }}/${{ env.PROJECT }}
+        run: angreal dev setup
+
+      - name: angreal test run
+        working-directory: ${{ env.RENDER_DIR }}/${{ env.PROJECT }}
+        run: angreal test run
+
+      - name: angreal test static
+        working-directory: ${{ env.RENDER_DIR }}/${{ env.PROJECT }}
+        run: angreal test static
+
+      - name: angreal test lint
+        working-directory: ${{ env.RENDER_DIR }}/${{ env.PROJECT }}
+        run: angreal test lint
+
+      # The Docker demo stack (`angreal demo start`) is not run in CI.
