@@ -1,41 +1,39 @@
-from {{provider_slug}}.triggers import {{name | title | replace(from=" ", to="")}}Trigger
-
-import pytest
+{% set cls = name | title | replace(from=" ", to="") -%}
 import asyncio
 
-def test_trigger():
+import pytest
+from airflow.triggers.base import TriggerEvent
 
-    trigger = {{name | title | replace(from=" ", to="")}}Trigger()
+import {{ provider_slug }}.triggers
+from {{ provider_slug }}.triggers import {{ cls }}Trigger
 
-    assert isinstance(trigger,{{name | title | replace(from=" ", to="")}}Trigger)
 
+def test_trigger_serialize():
+    """the trigger serializes its class path and arguments"""
+    trigger = {{ cls }}Trigger(poll_interval=3.0)
     classpath, kwargs = trigger.serialize()
+    assert classpath == "{{ provider_slug }}.triggers.{{ cls }}Trigger"
+    assert kwargs == {"poll_interval": 3.0}
 
 
 @pytest.mark.asyncio
-async def test_trigger_run_good(mocker):
+async def test_trigger_fires(monkeypatch):
+    """the trigger fires when the check succeeds"""
+    monkeypatch.setattr({{ provider_slug }}.triggers, "check_something", lambda: "done")
+    trigger = {{ cls }}Trigger(poll_interval=0.01)
 
-    trigger = {{name | title | replace(from=" ", to="")}}Trigger()
+    event = await asyncio.wait_for(trigger.run().__anext__(), timeout=5)
 
-    mocked_rv = {}
-    mocker.patch.object( Object, "method", return_value = mocked_rv) # mock whatever return you need to make your trigger return from deferred state
+    assert event == TriggerEvent({"status": "success", "result": "done"})
+
+
+@pytest.mark.asyncio
+async def test_trigger_waits(monkeypatch):
+    """the trigger keeps waiting while the check fails"""
+    monkeypatch.setattr({{ provider_slug }}.triggers, "check_something", lambda: None)
+    trigger = {{ cls }}Trigger(poll_interval=0.01)
 
     task = asyncio.create_task(trigger.run().__anext__())
-    await asyncio.sleep(1.0)
-    assert task.done() is True
-    asyncio.get_event_loop().stop()
-    
-
-
-@pytest.mark.asyncio
-async def test_trigger_run_bad(mocker):
-
-    trigger2 = {{name | title | replace(from=" ", to="")}}Trigger()
-
-    mocked_rv = {}
-    mocker.patch.object( Object, "method", return_value = mocked_rv) # mock whatever return you need to make your trigger return from deferred state
-
-    task2 = asyncio.create_task(trigger2.run().__anext__())
-    await asyncio.sleep(1.0)
-    assert task2.done() is False
-    asyncio.get_event_loop().stop()
+    await asyncio.sleep(0.2)
+    assert task.done() is False
+    task.cancel()

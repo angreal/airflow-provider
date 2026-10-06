@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{ provider_name }}"
+dynamic = ["version"]
+description = "{{ short_description }}"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE.txt"]
+authors = [{ name = "{{ author_name }}", email = "{{ author_email }}" }]
+# Airflow 3 supports these Python versions (apache-airflow 3.3.2: >=3.10, !=3.15).
+requires-python = ">=3.10,!=3.15"
+classifiers = [
+    "Framework :: Apache Airflow",
+    "Framework :: Apache Airflow :: Provider",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+# 3.2 is the first Airflow release that reads the declarative "conn-fields" /
+# "ui-field-behaviour" connection metadata from get_provider_info().
+dependencies = [
+    "apache-airflow>=3.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+]
+
+# Airflow discovers providers through this entry point.
+[project.entry-points.apache_airflow_provider]
+provider_info = "{{ provider_slug }}.provider:get_provider_info"
+
+[tool.setuptools.dynamic]
+version = { attr = "{{ provider_slug }}.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["{{ provider_slug }}*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--tb=short"
+
+[tool.mypy]
+warn_unused_ignores = true
+namespace_packages = true
+explicit_package_bases = true
+pretty = true
+show_error_codes = true
+ignore_missing_imports = true
+no_implicit_optional = true
+warn_redundant_casts = true
+show_error_context = true
+color_output = true

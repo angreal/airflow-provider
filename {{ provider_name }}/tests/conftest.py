@@ -1,58 +1,19 @@
-from contextlib import contextmanager
-import logging
-import pytest
-
 import os
-import shutil
+import tempfile
 
-import pytest
-
+# Configure Airflow before anything imports it. Unit tests do not need a
+# metadata database: Airflow 3 task code does not talk to the database.
+os.environ.setdefault("AIRFLOW_HOME", tempfile.mkdtemp(prefix="airflow-home-"))
+os.environ["AIRFLOW__CORE__UNIT_TEST_MODE"] = "True"
+os.environ["AIRFLOW__CORE__LOAD_EXAMPLES"] = "False"
 os.environ["AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS"] = "False"
-os.environ['AIRFLOW__CORE__UNIT_TEST_MODE'] = 'True'
-os.environ['AIRFLOW__CORE__LOAD_EXAMPLES'] = 'False'
-os.environ['AIRFLOW_HOME'] = os.path.join(os.path.dirname(__file__),'airflow')
 
-@contextmanager
-def suppress_logging(namespace):
-    """
-    Suppress logging within a specific namespace to keep tests "clean" during build
-    """
-    logger = logging.getLogger(namespace)
-    old_value = logger.disabled
-    logger.disabled = True
-    try:
-        yield
-    finally:
-        logger.disabled = old_value
-
-
-
-@pytest.fixture(autouse=True,scope='session')
-def initdb():
-    """Create a database for every testing session and add connections to it."""
-
-    from airflow.models import Connection
-    from airflow.utils import db
-
-    with suppress_logging("alembic.runtime.migration"):
-        db.initdb(load_connections=False)
-
-    # #Add Connections for Testing in here
-    # db.merge_conn(
-    #     Connection(
-    #     )
-    # )
-
-
-    yield
-
-    #clean up behind ourselves
-    shutil.rmtree(os.environ["AIRFLOW_HOME"])
+# Give tests a connection through an environment variable, for example:
+# os.environ["AIRFLOW_CONN_{{ name | upper | replace(from=" ", to="_") }}_DEFAULT"] = '{"conn_type": "{{ name | lower | replace(from=" ", to="") }}", "host": "localhost"}'
 
 
 def pytest_itemcollected(item):
-    """
-    use test doc strings as messages for the testing suite
-    """
-    if item._obj.__doc__:
-        item._nodeid = f"{item.obj.__doc__.strip().ljust(50,' ')[:50]}{str(item._nodeid).ljust(100,' ')[:50]}"
+    """Use test docstrings as the test names in the report."""
+    doc = getattr(getattr(item, "obj", None), "__doc__", None)
+    if doc:
+        item._nodeid = f"{doc.strip().ljust(50, ' ')[:50]}{str(item._nodeid).ljust(100, ' ')[:50]}"

@@ -1,41 +1,37 @@
-import logging
+{% set cls = name | title | replace(from=" ", to="") -%}
+from __future__ import annotations
+
+import asyncio
 import typing
 
 from airflow.triggers.base import BaseTrigger, TriggerEvent
-from asgiref.sync import sync_to_async
-
-from {{provider_slug}}.hooks import *
 
 
-
-logger = logging.getLogger("airflow")
-
-
-def check_something():
-    """A method that checks on something"""
-    return
-
-class {{name | title | replace(from=" ", to="")}}Trigger(BaseTrigger):
-
-    def __init__(self) -> None:
-        raise NotImplementedError("You need to implement an __init__ method for this class")
-        pass
+def check_something() -> typing.Any:
+    """A blocking check on the external service. Return a truthy value when
+    the condition you wait for is met."""
+    return True
 
 
-    def serialize(self) -> typing.Tuple[str,typing.Dict[str,typing.Any]]:
+class {{ cls }}Trigger(BaseTrigger):
+    """Poll ``check_something`` every ``poll_interval`` seconds and fire a
+    TriggerEvent when it returns a truthy value."""
 
-        raise NotImplementedError("You need to implement a serialize method for this class")
-        return {
-            "{{ provider_slug }}.triggers.{{name | title | replace(from=" ", to="")}}Trigger",
-            {
-            
-            },
-        }
+    def __init__(self, poll_interval: float = 5.0) -> None:
+        super().__init__()
+        self.poll_interval = poll_interval
 
-    async def run(self):
-        raise NotImplementedError("You need to implement a run method for this class")
+    def serialize(self) -> tuple[str, dict[str, typing.Any]]:
+        return (
+            "{{ provider_slug }}.triggers.{{ cls }}Trigger",
+            {"poll_interval": self.poll_interval},
+        )
+
+    async def run(self) -> typing.AsyncIterator[TriggerEvent]:
         while True:
-            check_something_call = sync_to_async(check_something)
-            rv = await check_something_call()
-            if rv :
-                yield TriggerEvent(rv)
+            # Run blocking code in a thread so the triggerer's event loop is not blocked.
+            result = await asyncio.to_thread(check_something)
+            if result:
+                yield TriggerEvent({"status": "success", "result": result})
+                return
+            await asyncio.sleep(self.poll_interval)

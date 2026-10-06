@@ -1,9 +1,8 @@
-from {{provider_slug}}.operators import {{name | title | replace(from=" ", to="") }}Operator
+{% set cls = name | title | replace(from=" ", to="") -%}
+from {{ provider_slug }}.operators import {{ cls }}Operator
 
 
-def test_operator():
-    operator = {{name | title | replace(from=" ", to="") }}Operator(task_id="test")
-    x = operator.execute(context={})
-
-
-
+def test_operator_execute():
+    """the operator returns its message"""
+    operator = {{ cls }}Operator(task_id="test", message="hello")
+    assert operator.execute(context={}) == "hello"
